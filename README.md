@@ -11,7 +11,7 @@ npm start
 You can also vist [here](https://shielded-river-95027.herokuapp.com/) to use it running on Heroku.
 
 ## Screenshot
-![Screenshot](screenshot.png)
+![Screenshot](/%20screenshot.png?raw=true)
 
 ## Technologies Used
 My design goals for this exercise were:
