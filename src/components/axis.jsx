@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {select} from "d3-selection";
+import { select } from "d3-selection";
 import "d3-selection-multi";
 
 export default class Axis extends Component {
@@ -12,10 +12,12 @@ export default class Axis extends Component {
   }
 
   renderAxis() {
-    var node  = this.refs.axis;
+    const node  = this.refs.axis;
+
     select(node)
       .call(this.props.axisFunction(this.props.scale).ticks(null, this.props.tickFormat))
       .select(".tick:last-of-type text")
+      .select(function() { return this.parentNode.appendChild(this.cloneNode()); })
         .attrs(this.props.labelAttrs)
         .text(this.props.label);
   }

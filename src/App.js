@@ -32,8 +32,8 @@ class App extends Component {
     this.filterByHand = this.filterByHand.bind(this);
     this.togglePitchOverlay = this.togglePitchOverlay.bind(this);
     this.state = {
-      screenWidth: 500,
-      screenHeight: 500,
+      screenWidth: 1,
+      screenHeight: 1,
       data: pitches,
       selectedPitchType: "All",
       selectedHand: "vsLR",
