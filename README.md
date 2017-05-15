@@ -8,9 +8,10 @@ npm start
 ```
 3. Visit `http://localhost:3000/` in your browser.
 
-## Screenshot
-![Screenshot]()
+You can also vist [here](https://shielded-river-95027.herokuapp.com/) to use it running on Heroku.
 
+## Screenshot
+![Screenshot](screenshot.png)
 
 ## Technologies Used
 My design goals for this exercise were:
@@ -33,6 +34,9 @@ Finally, I used [create-react-app](https://github.com/facebookincubator/create-r
 There is also some [react-bootstrap](https://react-bootstrap.github.io/) for styling of the buttons and dropdown.
 
 ## Notes
+* The density dimension I chose was location.
+It seemed the most natural and useful given the data. E.g. velo gets conflated with pitch type which would complicate the task for not a ton of benefit.
 * I did some minor massaging of the data to remove some obvious bad data points: pitches with negative z values and intentional balls (won't have to do that much longer).
 * The overlay function was my way of sanity checking that the heatmap was representing the data accurately. 
 I thought it was useful enough to leave in as some may prefer to see the actual data points.
+
