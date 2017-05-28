@@ -5,6 +5,7 @@ import { DropdownButton, MenuItem } from "react-bootstrap";
 import { Button, ButtonGroup } from "react-bootstrap";
 import pitchData from "./lester";
 import HeatMap from "./components/heatmap.jsx";
+import VideoSearch from "./components/video_search.jsx";
 
 const pitches = pitchData
   .pitches
@@ -72,6 +73,7 @@ class App extends Component {
     this.setState({ overlayPitches: !this.state.overlayPitches });
   }
 
+
   createTitle() {
     const count = this.state.data.length
     const pitchName = pitchTypeMap[this.state.selectedPitchType];
@@ -127,10 +129,10 @@ class App extends Component {
             width={this.state.screenWidth}
             renderOverlay={this.state.overlayPitches} />
         </div>
+        <VideoSearch data={pitches} />
       </div>
     );
   }
 }
 
 export default App;
-
