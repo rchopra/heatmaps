@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { ListGroup, ListGroupItem, Pagination } from "react-bootstrap";
 import { Form, FormGroup, FormControl, Button, Navbar } from "react-bootstrap";
 import ReactPlayer from 'react-player'
+import {search} from "./../services/pitchql"
 
 const pitchTypeMap = {
   All: "All Pitches",
@@ -20,19 +21,26 @@ export default class VideoSearch extends Component {
   constructor(props) {
     super(props);
     this.setSelectedVideo = this.setSelectedVideo.bind(this);
-    this.handleSelect= this.handleSelect.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.filterPitches = this.filterPitches.bind(this);
     this.state = {
+      query: "",
       selectedVideo: "",
       activePage: 1,
-      selectedPagePitches: this.props.data.slice(0,10),
-      numPages: Math.ceil(this.props.data.length / 10)
+      filteredPitches: [],
+      selectedPagePitches: [],
+      numPages: 0
     };
   }
 
   handleSelect(eventKey) {
-    const allPitches = this.props.data;
+    const allPitches = this.state.filteredPitches;
     const pitchesToDisplay = this.paginationSet(eventKey, allPitches)
-    this.setState({ activePage: eventKey, selectedPagePitches: pitchesToDisplay });
+    this.setState({
+      activePage: eventKey,
+      selectedPagePitches: pitchesToDisplay,
+    });
   }
 
   paginationSet(page, selectedPitches){
@@ -46,10 +54,19 @@ export default class VideoSearch extends Component {
     this.setState({ selectedVideo: pitch.video });
   }
 
+  handleChange(event) {
+    this.setState({query: event.target.value});
+  }
+
 	filterPitches(event) {
-		console.log("searching...");
 		// Don't POST and reload the page onSubmit
 		event.preventDefault();
+    const results = search(this.props.data, this.state.query);
+    this.setState({
+      filteredPitches: results,
+      selectedPagePitches: results.slice(0, 10),
+      numPages: Math.ceil(results.length / 10)
+    });
 	}
 
   render() {
@@ -65,7 +82,10 @@ export default class VideoSearch extends Component {
 					<Navbar.Form pullLeft>
 						<Form onSubmit={this.filterPitches}>
 							<FormGroup>
-								<FormControl type="text" placeholder="Search" />
+								<FormControl
+                  value={this.state.query}
+                  onChange={this.handleChange}
+                  type="text" placeholder="Search" />
 							</FormGroup>
 							{' '}
 							<Button type="submit">Submit</Button>
