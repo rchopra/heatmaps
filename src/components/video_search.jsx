@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { ListGroup, ListGroupItem, Pagination } from "react-bootstrap";
+import { Form, FormGroup, FormControl, Button, Navbar } from "react-bootstrap";
 import ReactPlayer from 'react-player'
 
 const pitchTypeMap = {
@@ -45,9 +46,34 @@ export default class VideoSearch extends Component {
     this.setState({ selectedVideo: pitch.video });
   }
 
+	filterPitches(event) {
+		console.log("searching...");
+		// Don't POST and reload the page onSubmit
+		event.preventDefault();
+	}
+
   render() {
     return <div>
-      <ListGroup id="1">
+			<Navbar>
+				<Navbar.Header>
+					<Navbar.Brand>
+						<a href="#">Pitch Video Search</a>
+					</Navbar.Brand>
+					<Navbar.Toggle />
+				</Navbar.Header>
+				<Navbar.Collapse>
+					<Navbar.Form pullLeft>
+						<Form onSubmit={this.filterPitches}>
+							<FormGroup>
+								<FormControl type="text" placeholder="Search" />
+							</FormGroup>
+							{' '}
+							<Button type="submit">Submit</Button>
+						</Form>
+					</Navbar.Form>
+				</Navbar.Collapse>
+			</Navbar>
+      <ListGroup>
         { this.state.selectedPagePitches.map((d, i) => {
           return <ListGroupItem onClick={this.setSelectedVideo} key={i} id={d.pitch_id}>{videoTitle(d)}</ListGroupItem> 
         })}
