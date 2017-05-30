@@ -5,7 +5,6 @@ import { extent } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import Contours from "./contours";
 import Axis from "./axis";
-import Legend from "./legend";
 import StrikeZone from "./strike_zone";
 import Scatter from "./scatter";
 
@@ -77,12 +76,12 @@ export default class HeatMap extends Component {
       label: "Feet"
     };
 
-    const legendSettings = {
-      translate: `translate(${(this.props.width - styles.margin_right - 5*styles.legend_width)}, 0)`,
-      contour_extent: extent(this.contours(), d => {
-        return Math.round(d.value * Math.pow(this.props.width*this.props.height, 0.5), 1);
-      })
-    };
+    //const legendSettings = {
+      //translate: `translate(${(this.props.width - styles.margin_right - 5*styles.legend_width)}, 0)`,
+      //contour_extent: extent(this.contours(), d => {
+        //return Math.round(d.value * Math.pow(this.props.width*this.props.height, 0.5), 1);
+      //})
+    //};
 
     return <svg width={this.props.width} height={this.props.height}>
       <Contours
@@ -95,7 +94,6 @@ export default class HeatMap extends Component {
       {this.pitchOverlay()}
       <Axis {...xSettings} />
       <Axis {...ySettings} />
-      <Legend {...legendSettings} />
       <StrikeZone x={xScale(this.props)} y={yScale(this.props)} />
     </svg>
   }
