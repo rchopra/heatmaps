@@ -3,6 +3,7 @@ import "./App.css";
 import logo from "./cubs_logo.svg";
 import { DropdownButton, MenuItem } from "react-bootstrap";
 import { Button, ButtonGroup } from "react-bootstrap";
+import { Tabs, Tab } from "react-bootstrap";
 import pitchData from "./lester";
 import HeatMap from "./components/heatmap.jsx";
 import VideoSearch from "./components/video_search.jsx";
@@ -32,9 +33,11 @@ class App extends Component {
     this.filterByPitchType = this.filterByPitchType.bind(this);
     this.filterByHand = this.filterByHand.bind(this);
     this.togglePitchOverlay = this.togglePitchOverlay.bind(this);
+    this.handleSelectTab = this.handleSelectTab.bind(this);
     this.state = {
       screenWidth: 1,
       screenHeight: 1,
+      tabKey: 1,
       data: pitches,
       selectedPitchType: "All",
       selectedHand: "vsLR",
@@ -73,6 +76,9 @@ class App extends Component {
     this.setState({ overlayPitches: !this.state.overlayPitches });
   }
 
+  handleSelectTab(key) {
+    this.setState({ tabKey: key });
+  }
 
   createTitle() {
     const count = this.state.data.length
@@ -93,43 +99,49 @@ class App extends Component {
             <img src={logo} className="App-logo" alt="logo" />
             <span className="header-text">Pitch Location Heatmaps</span>
         </div>
-        <div className="filter-controls">
-          <DropdownButton
-            id="pitchTypeDropdown"
-            title={pitchTypeMap[this.state.selectedPitchType]}
-            onSelect={this.filterByPitchType}>
-            {pitchTypes.map((d, i) => <MenuItem key={i} eventKey={d}>{pitchTypeMap[d]}</MenuItem>) }
-          </DropdownButton>
-          {" "}
-          <ButtonGroup>
-            <Button
-              onClick={this.filterByHand}
-              id="vsLR"
-              active={this.state.selectedHand === "vsLR"}>vs All</Button>
-            <Button
-              onClick={this.filterByHand}
-              id="vsL"
-              active={this.state.selectedHand === "vsL"}>vs L</Button>
-            <Button
-              onClick={this.filterByHand}
-              id="vsR"
-              active={this.state.selectedHand === "vsR"}>vs R</Button>
-          </ButtonGroup>
-          {" "}
-          <Button
-            active={this.state.overlayPitches}
-            id="pitchOverlay"
-            onClick={this.togglePitchOverlay}>Pitch Overlay</Button>
-        </div>
-        <div>
-          {this.createTitle()}
-          <HeatMap
-            data={this.state.data}
-            height={this.state.screenHeight}
-            width={this.state.screenWidth}
-            renderOverlay={this.state.overlayPitches} />
-        </div>
-        <VideoSearch data={pitches} />
+        <Tabs activeKey={this.state.tabKey} onSelect={this.handleSelectTab}>
+          <Tab title="Heatmaps" eventKey={1}>
+            <div className="filter-controls">
+              <DropdownButton
+                id="pitchTypeDropdown"
+                title={pitchTypeMap[this.state.selectedPitchType]}
+                onSelect={this.filterByPitchType}>
+                {pitchTypes.map((d, i) => <MenuItem key={i} eventKey={d}>{pitchTypeMap[d]}</MenuItem>) }
+              </DropdownButton>
+              {" "}
+              <ButtonGroup>
+                <Button
+                  onClick={this.filterByHand}
+                  id="vsLR"
+                  active={this.state.selectedHand === "vsLR"}>vs All</Button>
+                <Button
+                  onClick={this.filterByHand}
+                  id="vsL"
+                  active={this.state.selectedHand === "vsL"}>vs L</Button>
+                <Button
+                  onClick={this.filterByHand}
+                  id="vsR"
+                  active={this.state.selectedHand === "vsR"}>vs R</Button>
+              </ButtonGroup>
+              {" "}
+              <Button
+                active={this.state.overlayPitches}
+                id="pitchOverlay"
+                onClick={this.togglePitchOverlay}>Pitch Overlay</Button>
+            </div>
+            <div>
+              {this.createTitle()}
+              <HeatMap
+                data={this.state.data}
+                height={this.state.screenHeight}
+                width={this.state.screenWidth}
+                renderOverlay={this.state.overlayPitches} />
+            </div>
+          </Tab>
+          <Tab title="Video Search" eventKey={2}>
+            <VideoSearch data={pitches} />
+          </Tab>
+        </Tabs>
       </div>
     );
   }
