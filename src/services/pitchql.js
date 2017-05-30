@@ -31,33 +31,200 @@
 // video: 'https://cvmdo.bamnetworks.com/mlbam/2016/04/06/446880/coaching_video/cv_575333983_4500K.mp4'
 
 
-const fieldMap = {
-  h: "batter_side",
-  hand: "batter_side",
-  v: "velocity",
-  velo: "velocity",
-  velocity: "velocity",
-  outcome: "pa_outcome"
-}
+//From Mozilla Docs
+const flatten = arr => arr.reduce(
+  (acc, val) => acc.concat(
+    Array.isArray(val) ? flatten(val) : val
+  ),
+  []
+);
 
-const parseCriterion = function(criterion) {
-  let tokens = criterion.split(":");
-  let field = fieldMap[tokens[0]];
-  let value = tokens[1];
-
+const criterion = function(field, value) {
   return {field: field, value: value, operator: "="};
 }
 
+const filterCount = function(collection, value) {
+  return collection.filter(function(item) {
+    switch (value) {
+      case "full":
+        return item["balls"] === 3 && item["strikes"] === 2
+      case "even":
+        return item["balls"] === item["strikes"]
+      case "ahead":
+        return item["balls"] < item["strikes"]
+      case "behind":
+        return item["balls"] > item["strikes"] && item["strikes"] < 2
+      default:
+        return true;
+    }
+  });
+}
+
+const filterName = function(collection, value) {
+  const nameHits = collection.filter(function(item) {
+    let nameTokens = item["batter_name"].toLowerCase().split(",").map(d => d.trim());
+    return nameTokens.find(d => value.split(" ").find(e => e === d));
+  });
+
+  if (nameHits.length === 0) {
+    return collection;
+  }
+
+  return nameHits;
+}
+
 const applyFilter = function(collection, filterParams) {
+  if (filterParams.field === "count") {
+    return filterCount(collection, filterParams.value);
+  }
+
+  if (filterParams.field === "batter_name") {
+    return filterName(collection, filterParams.value);
+  }
+
   return collection.filter(function(item) {
     return item[filterParams.field] === filterParams.value;
   });
 }
 
+const handedness = function(terms) {
+  let filters = [];
+  const field = "batter_side"
+  if (/\blefty?\b|\blefties?\b/.test(terms)) {
+    filters.push(criterion(field, "L"))
+  }
+  if (/\brighty?\b|\brighties?\b/.test(terms)) {
+    filters.push(criterion(field, "R"))
+  }
+
+  return filters;
+}
+
+const outcome = function(terms) {
+  //"OUT", "K", "1B", "2B", "HR", "UBB", null, "HBP", "SAC", "ROE", "SF", "3B"
+  let filters = [];
+  const field = "pa_outcome"
+
+  if (/\b1bs?\b|\bsingles?\b/.test(terms)) {
+    filters.push(criterion(field, "1B"))
+  }
+  if (/\b2bs?\b|\bdoubles?\b/.test(terms)) {
+    filters.push(criterion(field, "2B"))
+  }
+  if (/\b3bs?\b|\btriples?\b/.test(terms)) {
+    filters.push(criterion(field, "3B"))
+  }
+  if (/\bhrs?\b|\bhomers?\b|\bhome runs?\b/.test(terms)) {
+    filters.push(criterion(field, "HR"))
+  }
+  if (/\bks?\b|\bstrike\s?outs?\b/.test(terms)) {
+    filters.push(criterion(field, "K"))
+  }
+  if (/\bbbs?\b|\bwalks?\b/.test(terms)) {
+    filters.push(criterion(field, "UBB"))
+  }
+  if (/\bbbps?\b|\bhit\s?by\s?pitch\b/.test(terms)) {
+    filters.push(criterion(field, "UBB"))
+  }
+
+  // if this filter is applied, show only outcome pitches
+  if (filters.length > 0) {
+    filters.push(criterion("is_pa_pitch", true))
+  }
+
+  return filters;
+}
+
+const pitchType = function(terms) {
+  let filters = [];
+  const field = "pitch_type"
+  if (/\b(4|four)[-\s]?seam(er)?s?\s?(fastballs?)?\b|\bfa\b/.test(terms)) {
+    filters.push(criterion(field, "FA"))
+  }
+  if (/\bcutters?\b|\bfc\b/.test(terms)) {
+    filters.push(criterion(field, "FC"))
+  }
+  if (/\bchange[-\s]ups?\b|\bch\b/.test(terms)) {
+    filters.push(criterion(field, "CH"))
+  }
+  if (/\sinkers?\b|\bsi\b/.test(terms)) {
+    filters.push(criterion(field, "SI"))
+  }
+  if (/\bcurve[-\s]?(ball)?s?\b|cu\b/.test(terms)) {
+    filters.push(criterion(field, "CU"))
+  }
+
+  return filters;
+}
+
+const swing = function(terms){
+  let filters = [];
+
+  if (/\bswings?\b/.test(terms)) {
+    filters.push(criterion("is_swing", true))
+  }
+  if (/\bballs?\b/.test(terms)) {
+    filters.push(criterion("is_called_ball", true))
+  }
+  if (/\bcalled\s?strikes?\b/.test(terms)) {
+    filters.push(criterion("is_called_strike", true))
+  }
+  if (/\bwhiffs?\b|\bswings?\sand\smiss(es)?\b/.test(terms)) {
+    filters.push(criterion("is_swing", true))
+    filters.push(criterion("is_foul", false))
+    filters.push(criterion("is_bip", false))
+  }
+
+  return filters;
+}
+
+const count = function(terms) {
+  let filters = [];
+  const field = "count"
+
+  if (/\bahead\b/.test(terms)) {
+    filters.push(criterion(field, "ahead"))
+  }
+  if (/\bbehind\b/.test(terms)) {
+    filters.push(criterion(field, "behind"))
+  }
+  if (/\beven\b/.test(terms)) {
+    filters.push(criterion(field, "even"))
+  }
+  if (/\bfull\b/.test(terms)) {
+    filters.push(criterion(field, "full"))
+  }
+
+  return filters;
+}
+
+const batterName = function(terms) {
+  let filters = [];
+  const field = "batter_name"
+
+  filters.push(criterion(field, terms))
+
+  return filters;
+}
+
+const allFilters = [
+  handedness,
+  outcome,
+  pitchType: pitchType,
+  swing,
+  count,
+  batterName
+]
+
+const parseQuery = function(query) {
+  const terms = query.toLowerCase();
+  const filtersToApply = flatten(allFilters.map(filter => filter(terms)))
+  return filtersToApply;
+}
+
 const filter = function(pitches, query) {
   let results = pitches;
-  query.split(" ").forEach(function(criterion) {
-    let filterParams = parseCriterion(criterion);
+  parseQuery(query).forEach(function(filterParams) {
     results = applyFilter(results, filterParams);
   });
 
