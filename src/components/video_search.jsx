@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { ListGroup, ListGroupItem, Pagination } from "react-bootstrap";
-import { Form, FormGroup, FormControl, Button, Navbar } from "react-bootstrap";
+import { Form, FormGroup, FormControl, Button } from "react-bootstrap";
 import { Grid, Row, Col } from "react-bootstrap";
 import ReactPlayer from 'react-player'
 import {search} from "./../services/pitchql"
@@ -14,8 +14,12 @@ const pitchTypeMap = {
   CH: "Changeup"
 }
 
-const videoTitle = function(pitch) {
-  return `${pitch.pitcher_name} vs ${pitch.batter_name} (${pitch.batting_team_abbr}): ${pitchTypeMap[pitch.pitch_type]} ${pitch.velocity}mph - ${pitch.game_date}`
+const videoHeading = function(pitch) {
+  return `${pitch.pitcher_name} vs ${pitch.batter_name} (${pitch.batting_team_abbr})`
+}
+
+const videoDescription = function(pitch) {
+  return `${pitchTypeMap[pitch.pitch_type]} ${pitch.velocity} mph - ${pitch.game_date}`
 }
 
 export default class VideoSearch extends Component {
@@ -50,8 +54,8 @@ export default class VideoSearch extends Component {
     return selectedPitches.slice(index, index+numPerPage);
   }
 
-  setSelectedVideo(event) {
-    const pitch = this.props.data.find(d => `${d.pitch_id}` === event.target.id)
+  setSelectedVideo(pitch_id) {
+    const pitch = this.props.data.find(d => d.pitch_id === pitch_id)
     this.setState({ selectedVideo: pitch.video });
   }
 
@@ -72,39 +76,35 @@ export default class VideoSearch extends Component {
 
   render() {
     return <div>
+      <br />
       <Grid>
       <Row>
         <Col>
-          <Navbar>
-            <Navbar.Header>
-              <Navbar.Brand>
-                <a href="#">Pitch Video Search</a>
-              </Navbar.Brand>
-              <Navbar.Toggle />
-            </Navbar.Header>
-            <Navbar.Collapse>
-              <Navbar.Form pullLeft>
-                <Form onSubmit={this.filterPitches}>
-                  <FormGroup>
-                    <FormControl
-                      value={this.state.query}
-                      onChange={this.handleChange}
-                      type="text" placeholder="Search" />
-                  </FormGroup>
-                  {' '}
-                  <Button type="submit">Submit</Button>
-                </Form>
-              </Navbar.Form>
-            </Navbar.Collapse>
-          </Navbar>
+          <Form horizontal onSubmit={this.filterPitches}>
+            <FormGroup>
+              <Col sm={10}>
+                <FormControl
+                  value={this.state.query}
+                  onChange={this.handleChange}
+                  type="text" placeholder="Search" />
+              </Col>
+              <Col sm={2}>
+                <Button type="submit">Get Videos</Button>
+              </Col>
+            </FormGroup>
+          </Form>
         </Col>
       </Row>
       <Row>
-        <Col md={4}>
+        <Col sm={5}>
         <div>
           <ListGroup>
             { this.state.selectedPagePitches.map((d, i) => {
-              return <ListGroupItem onClick={this.setSelectedVideo} key={i} id={d.pitch_id}>{videoTitle(d)}</ListGroupItem> 
+              return <ListGroupItem
+                onClick={() => this.setSelectedVideo(d.pitch_id)}
+                key={i}
+                id={d.pitch_id}
+                header={videoHeading(d)}>{videoDescription(d)}</ListGroupItem>
             })}
           </ListGroup>
           <Pagination
@@ -120,7 +120,7 @@ export default class VideoSearch extends Component {
              onSelect={this.handleSelect} />
                </div>
         </Col>
-        <Col md={8}>
+        <Col sm={7}>
           <ReactPlayer playing controls url={this.state.selectedVideo} />
         </Col>
       </Row>
