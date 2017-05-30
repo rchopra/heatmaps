@@ -12,6 +12,7 @@
     "d3-selection": "1.0.6",
     "d3-selection-multi": "1.0.1",
     "d3-svg-legend": "2.24.0",
+    "d3-transition": "^1.1.0",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",
     "react-dom": "15.5.4",

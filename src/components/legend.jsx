@@ -4,6 +4,7 @@ import { interpolateHslLong } from "d3-interpolate";
 import { legendColor } from "d3-svg-legend";
 import { scaleSequential } from "d3-scale";
 import { select } from "d3-selection";
+require("d3-transition");
 
 export default class Axis extends Component {
   componentDidMount() {
